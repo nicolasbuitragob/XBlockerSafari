@@ -1,0 +1,30 @@
+{
+  "manifest_version": 2,
+  "name": "X Blocker",
+  "version": "1.0.0",
+  "description": "Blocks x.com in Safari and replaces it with a local blocked screen.",
+  "icons": {
+    "48": "assets/Icon.png",
+    "96": "assets/Icon.png",
+    "128": "assets/Icon.png"
+  },
+  "permissions": [
+    "*://x.com/*",
+    "*://*.x.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://x.com/*",
+        "*://*.x.com/*"
+      ],
+      "css": [
+        "styles/preblock.css"
+      ],
+      "js": [
+        "scripts/block-x.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}
