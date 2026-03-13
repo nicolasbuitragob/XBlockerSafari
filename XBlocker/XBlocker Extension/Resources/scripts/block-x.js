@@ -7,14 +7,20 @@
     return;
   }
 
+  // Stop all network activity immediately.
+  try {
+    window.stop();
+  } catch (_) {}
+
   const escapeHtml = (value) =>
     value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
   const attemptedUrl = escapeHtml(window.location.href);
 
-  const blockedMarkup = `<!doctype html>
-<html lang="en">
-  <head>
+  function injectBlockScreen() {
+    // Nuke the entire document tree and replace it.
+    const root = document.documentElement;
+    root.innerHTML = `<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>X Blocked</title>
@@ -38,6 +44,7 @@
       body {
         margin: 0;
         min-height: 100%;
+        opacity: 1 !important;
       }
 
       body {
@@ -138,21 +145,42 @@
   <body>
     <main class="shell" role="main" aria-labelledby="blocked-title">
       <div class="badge">Site Blocked</div>
-      <h1 id="blocked-title">X Is Blocked</h1>
-      <p>This Safari extension stops access to x.com on this Mac. Close this tab and open something else.</p>
+      <h1 id="blocked-title">Stop Doomscrolling</h1>
+      <p>Go build something. Get outside. Do something better with your time.</p>
       <div class="url">${attemptedUrl}</div>
-      <div class="note">If you type x.com again, this screen will replace it again.</div>
+      <div class="note">Every time you type x.com, this screen will be here to remind you.</div>
     </main>
-  </body>
-</html>`;
+  </body>`;
 
-  try {
-    window.stop();
-  } catch (_) {
-    // Ignore stop errors and still replace the page.
+    root.setAttribute("lang", "en");
+    // Mark that we've taken over so the observer knows.
+    root.dataset.xblocked = "1";
   }
 
-  document.open();
-  document.write(blockedMarkup);
-  document.close();
+  // Inject immediately.
+  injectBlockScreen();
+
+  // Safari may keep parsing the original HTML and overwrite our content.
+  // Use a MutationObserver to re-inject if that happens.
+  let guardCount = 0;
+  const maxGuards = 50;
+
+  const observer = new MutationObserver(() => {
+    if (document.documentElement.dataset.xblocked !== "1") {
+      guardCount++;
+      injectBlockScreen();
+      try { window.stop(); } catch (_) {}
+      if (guardCount >= maxGuards) {
+        observer.disconnect();
+      }
+    }
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
+
+  // Stop guarding after 5 seconds — the page should be fully blocked by then.
+  setTimeout(() => observer.disconnect(), 5000);
 })();
