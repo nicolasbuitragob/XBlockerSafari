@@ -9,7 +9,7 @@ Safari extension for macOS that blocks `x.com` and replaces it with a local bloc
 
 ## Open In Xcode
 
-Open `/Users/nicolasbuitrago/code/x_blocker/XBlocker/XBlocker.xcodeproj`.
+From the repository root, open `XBlocker/XBlocker.xcodeproj`.
 
 ## Build From Terminal
 
@@ -24,7 +24,7 @@ xcodebuild -project XBlocker/XBlocker.xcodeproj \
 
 The built app will be at:
 
-`/Users/nicolasbuitrago/code/x_blocker/build/Build/Products/Debug/XBlocker.app`
+`build/Build/Products/Debug/XBlocker.app`
 
 ## Enable The Extension
 
